@@ -1,21 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, Zap, Activity, Target, Copy, Clock } from "lucide-react"
-import { useWebSocket } from "@/components/websocket-provider" // Import useWebSocket from the correct path
+import { useWebSocket } from "@/components/websocket-provider"
 
-export default function SeiScoutLanding() {
+function SeiScoutLandingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [walletAddress, setWalletAddress] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [latency, setLatency] = useState(0)
-  const { isConnected: wsConnected } = useWebSocket() // WebSocket status
+  const { isConnected: wsConnected } = useWebSocket()
 
   // Demo wallet addresses
   const demoWallets = [
@@ -140,9 +140,6 @@ export default function SeiScoutLanding() {
       alert(`Keplr error: ${error.message || error.toString()}`)
     }
   }
-
-  // No useEffect for searchParams here, as this is the landing page.
-  // The dashboard page will handle reading searchParams.
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950">
@@ -271,5 +268,24 @@ export default function SeiScoutLanding() {
         </div>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-blue-950 flex items-center justify-center">
+      <div className="text-center">
+        <Activity className="w-8 h-8 animate-spin mx-auto mb-4" />
+        <p>Loading...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function SeiScoutLanding() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SeiScoutLandingContent />
+    </Suspense>
   )
 }
